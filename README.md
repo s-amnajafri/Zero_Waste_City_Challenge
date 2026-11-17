@@ -1,6 +1,6 @@
 # Zero-Waste City Challenge
 
-CT-363 Design and Analysis of Algorithms. A decision-support system that plans waste-collection
+A decision-support system that plans waste-collection
 routes with two algorithmic paradigms working together:
 
 1. **Greedy construction** decides *which* points are served and by *which* vehicle.
