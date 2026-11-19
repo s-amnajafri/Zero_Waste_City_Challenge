@@ -117,7 +117,8 @@ class TestAgainstOracleAndProperties(unittest.TestCase):
                     else:
                         self.assertAlmostEqual(a, b, places=9)
 
-    def test_symmetry(self):
+    #distance from A to B = distance from B to A (symmetric) and triangle inequality holds (distance from A to C <= distance from A to B + distance from B to C)
+    def test_symmetry(self):        
         for inst in self.insts:
             sp = ShortestPaths(inst)
             for i in range(inst.node_count):

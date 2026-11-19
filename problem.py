@@ -29,7 +29,7 @@ A plan is FEASIBLE iff
 
 GLOBAL OBJECTIVE (lexicographic)
   1. maximise  W(plan) = sum over served points p of  u_p * q_p     (urgency-weighted waste)
-  2. among plans with equal W, minimise  D(plan) = sum_k dist(0, R_k, 0)   (total km)
+  2. among plans with equal W, minimise  D(plan) = sum_k dist(0, R_k, 0)   (minimiza the total travel distance)
 
   W is an integer, so "equal W" is exact.  Distances are floats compared with EPS.
   Greedy chooses WHICH points are served (and so fixes W); 2-opt only reorders
@@ -64,13 +64,11 @@ REASON_TEXT = {
 
 
 def leq(a: float, b: float) -> bool:
-    """a <= b with floating-point tolerance."""
+    """a <= b with floating-point tolerance. (EPS)"""
     return a <= b + EPS
 
 
-# --------------------------------------------------------------------------
 # Initial point classification (pre-screening)
-# --------------------------------------------------------------------------
 @dataclass
 class PointClass:
     status: str                                   # UNREACHABLE / INFEASIBLE / ELIGIBLE
@@ -95,7 +93,7 @@ def classify_points(inst: Instance, sp: ShortestPaths) -> Dict[int, PointClass]:
     for p in inst.points:
         if not sp.reachable(0, p.id):
             out[p.id] = PointClass(UNREACHABLE, ["no open-road path from the depot"])
-            continue
+            continue         #no point in checking the rest of the conditions if unreachable
         done = sp.travel_time(0, p.id) + p.service_time        # completion if served first
         back = sp.travel_time(p.id, 0)
         reasons: List[str] = []
@@ -112,27 +110,26 @@ def classify_points(inst: Instance, sp: ShortestPaths) -> Dict[int, PointClass]:
     return out
 
 
-# --------------------------------------------------------------------------
 # Objective
-# --------------------------------------------------------------------------
+#1. calculate urgency weighted waste of a plan
 def urgency_weighted_waste(inst: Instance, plan: Plan) -> int:
     """W(plan) = sum over served points of urgency * waste."""
     return sum(inst.point(j).urgency * inst.point(j).waste
                for stops in plan.values() for j in stops)
 
-
+#2. calculate total distance of a plan
 def plan_distance(sp: ShortestPaths, plan: Plan) -> float:
     """D(plan) = total km over all non-empty routes (depot -> stops -> depot)."""
     return sum(sp.route_distance([0] + list(s) + [0]) for s in plan.values() if s)
 
-
+#returns both 1&2 objectives
 def objective(inst: Instance, sp: ShortestPaths, plan: Plan) -> Tuple[int, float]:
     """(W, D).  Better plan = larger W; if W ties, smaller D."""
     return urgency_weighted_waste(inst, plan), plan_distance(sp, plan)
 
-
+#compares 2 opectives using lexicographic rule
 def is_better(a: Tuple[int, float], b: Tuple[int, float]) -> bool:
     """True iff objective a is strictly better than b under the lexicographic rule."""
     if a[0] != b[0]:
-        return a[0] > b[0]
-    return a[1] < b[1] - EPS
+        return a[0] > b[0]        #if different Ws of 2 plans, we compare  Ws
+    return a[1] < b[1] - EPS     #else if Ws are same, we compare distances.

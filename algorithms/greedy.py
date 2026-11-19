@@ -92,8 +92,8 @@ from algorithms.shortest_path import INF, ShortestPaths
 # --------------------------------------------------------------------------
 @dataclass(frozen=True)
 class GreedyParams:
-    alpha: float = 1.0      # weight of urgency
-    beta: float = 0.5       # weight of additional distance
+    alpha: float = 1.0      # weight of urgency  (default)
+    beta: float = 0.5       # weight of additional distance (default)
 
 
 def extra_distance(sp: ShortestPaths, i: int, j: int) -> float:
@@ -117,30 +117,39 @@ class _State:
     stops: List[int] = field(default_factory=list)
     arrivals: List[float] = field(default_factory=list)
     completions: List[float] = field(default_factory=list)
-    load: int = 0
-    pos: int = 0
+    load: int = 0               #total load collected so far
+    pos: int = 0                #vehicle's current location
     clock: float = 0.0          # completion time at `pos`
     dist: float = 0.0           # km driven so far (without the return trip)
 
 
 _RANK = {"unreachable": -1, "capacity": 0, "deadline": 1, "route_duration": 2}
 
-
+#higher score doesn't automatically mean a point will be collected because the vehicle may not have enough capacity or may not be able to reach the point before its deadline. 
+# So, a vehicle-point combination must also be 'feasible' (E1, E2, E3) 
 def _evaluate(inst: Instance, sp: ShortestPaths, st: _State, j: int
               ) -> Tuple[Optional[str], float, float]:
     """(blocking reason or None, arrival, completion) for adding point j to vehicle st."""
     p = inst.point(j)
+    #constraint 1: capacity
     if st.load + p.waste > st.v.capacity:                                  # E1
         return "capacity", 0.0, 0.0
+    
+    #constraint 2: reachability
     d = sp.dist(st.pos, j)
     if d == INF:
         return "unreachable", 0.0, 0.0
-    arrival = st.clock + inst.travel_time(d)
+    
+    #constraint 3: completion deadline
+    arrival = st.clock + inst.travel_time(d)            #st.clock is the completion time at the last stop, while travel_time() is time required to reach this new point.
     completion = arrival + p.service_time
     if not leq(completion, p.deadline):                                    # E2
         return "deadline", arrival, completion
+    
+    #constraint 4: route duration  (a truck should be able to return to depot within its max vehicle duration time)
     if not leq(completion + inst.travel_time(sp.dist(j, 0)), st.v.max_duration):   # E3
         return "route_duration", arrival, completion
+    
     return None, arrival, completion
 
 
@@ -192,39 +201,46 @@ class GreedyResult:
 
 
 # --------------------------------------------------------------------------
-# Algorithm
+# Main Algorithm
 # --------------------------------------------------------------------------
 def greedy_construct(inst: Instance, sp: Optional[ShortestPaths] = None,
                      params: GreedyParams = GreedyParams()) -> GreedyResult:
-    t0 = time.perf_counter()
+    t0 = time.perf_counter()           #to measure execution time; this records teh starting time
     sp = sp or ShortestPaths(inst)
-    classification = classify_points(inst, sp)
-    unassigned = sorted(pid for pid, c in classification.items() if c.status == ELIGIBLE)
+    classification = classify_points(inst, sp)           #classification logic from problem.py
+    unassigned = sorted(pid for pid, c in classification.items() if c.status == ELIGIBLE)        #list of eligible points
     n_cand = len(unassigned)
     d_max = max((sp.dist(0, p.id) for p in inst.points if sp.reachable(0, p.id)), default=0.0)
 
-    states = {v.id: _State(v) for v in inst.vehicles}
-    log: List[Tuple[int, int, float, float]] = []
-    evaluations = 0
+    states = {v.id: _State(v) for v in inst.vehicles}       #stores state of each vehicle
+    
+    log: List[Tuple[int, int, float, float]] = []     #log records choice made by greedy (like vehicle, point, score etc)
+    evaluations = 0                                   #how many vehicle-point pairs were checks; log and evaluate are useful to explain and evaluate alg later
 
+    #selection loop: while there are still unassigned points, find the best feasible vehicle-point pair and assign it to the vehicle. Repeat until no feasible pair remains.
     while unassigned:
-        best_key = None
-        best = None
+        best_key = None     #stores best collection point
+        best = None         #stores corresponding vehicle-point combination
+
+        #Examine every vehicle and every remaining point (global greedy approach) to find the best feasible pair (vehicle, point) to serve next.
         for st in states.values():
             for j in unassigned:
                 evaluations += 1
-                fail, arrival, completion = _evaluate(inst, sp, st, j)
-                if fail is not None:
+                fail, arrival, completion = _evaluate(inst, sp, st, j)      #check feasibility before calculating score
+                if fail is not None:               #not removing that point from unassigned because it may be feasible for another vehicle
                     continue
+                #calculate the score for feasible vehicle-point combinations
                 p = inst.point(j)
                 extra = extra_distance(sp, st.pos, j)
                 score = priority_score(p.urgency, extra, d_max, params.alpha, params.beta)
-                key = (-round(score, 9), -p.urgency, round(extra, 9), j,
+                key = (-round(score, 9), -p.urgency, round(extra, 9), j,      #score and urgency are -ve cz Python's normal tuple comparison selects the smaller tuple; (lexicographic order). 
                        st.v.capacity - st.load - p.waste, st.v.id)
-                if best_key is None or key < best_key:
+                if best_key is None or key < best_key:     #smaller key is better so it is assigned as best_key and the corresponding vehicle-point combination is assigned as best
                     best_key, best = key, (st, j, arrival, completion, extra, score)
+        
         if best is None:                       # no feasible (vehicle, point) pair left
             break
+        #update state of the selected/winning vehicle and remove the selected point from unassigned
         st, j, arrival, completion, extra, score = best
         st.dist += sp.dist(st.pos, j)
         st.stops.append(j)
@@ -232,7 +248,7 @@ def greedy_construct(inst: Instance, sp: Optional[ShortestPaths] = None,
         st.completions.append(completion)
         st.load += inst.point(j).waste
         st.pos, st.clock = j, completion
-        unassigned.remove(j)
+        unassigned.remove(j)       #remove the selected point from unassigned so that it is not considered in future iterations
         log.append((st.v.id, j, score, extra))
 
     # label every unserved eligible point with the reason it is blocked (final state)
@@ -241,7 +257,7 @@ def greedy_construct(inst: Instance, sp: Optional[ShortestPaths] = None,
         reasons = [_evaluate(inst, sp, st, j)[0] for st in states.values()]
         uncollected[j] = max(reasons, key=lambda r: _RANK[r])   # "furthest-along" blocker
 
-    # close routes with the return trip
+    # close routes with the return trip (selection loop tracks the distance travelled to collection points, but does not include the return trip in st.dist.)
     routes: Dict[int, VehicleRoute] = {}
     for vid, st in states.items():
         if st.stops:

@@ -83,20 +83,22 @@ DEFAULT_MAX_ITER = 1000
 
 # --------------------------------------------------------------------------
 # Feasibility of a candidate order (re-simulates the clock from the depot)
+# a shorter route is not necessarily a feasible route. So, check feasibility after proposed reversed route
 # --------------------------------------------------------------------------
+
 def _violation(inst: Instance, sp: ShortestPaths, veh: Vehicle, stops: Sequence[int]) -> Optional[str]:
     """None if the order meets C2 (completion deadlines) and C3 (duration); else the first violated rule."""
-    t, pos = 0.0, 0
+    t, pos = 0.0, 0        #initialise time and position at depot
     for j in stops:
         p = inst.point(j)
-        t += inst.travel_time(sp.dist(pos, j)) + p.service_time
-        if not leq(t, p.deadline):
+        t += inst.travel_time(sp.dist(pos, j)) + p.service_time    #update time
+        if not leq(t, p.deadline):       #check the deadline
             return "deadline"
-        pos = j
-    t += inst.travel_time(sp.dist(pos, 0))
+        pos = j                          #update position of vehicle
+    t += inst.travel_time(sp.dist(pos, 0))     #check return journey
     if not leq(t, veh.max_duration):
         return "route_duration"
-    return None
+    return None              #proposed reversed route is feasible
 
 
 def _rebuild(inst: Instance, sp: ShortestPaths, veh: Vehicle, stops: List[int]) -> VehicleRoute:
@@ -121,10 +123,10 @@ def _rebuild(inst: Instance, sp: ShortestPaths, veh: Vehicle, stops: List[int]) 
 
 
 # --------------------------------------------------------------------------
-# Result containers
+# Result Classes
 # --------------------------------------------------------------------------
 @dataclass
-class RouteImprovement:
+class RouteImprovement:     #stores the improvement information for one vehicle.
     vehicle_id: int
     before: List[int]
     after: List[int]
@@ -138,7 +140,7 @@ class RouteImprovement:
     feasibility_checks: int = 0
 
     @property
-    def saved_km(self) -> float:
+    def saved_km(self) -> float:   #Dbefore - Dafter
         return self.before_km - self.after_km
 
     @property
@@ -159,7 +161,7 @@ class TwoOptResult:
         return 100.0 * (self.total_before - self.total_after) / self.total_before if self.total_before > 0 else 0.0
 
     @property
-    def all_converged(self) -> bool:
+    def all_converged(self) -> bool:        
         return all(i.converged for i in self.improvements.values())
 
     def plan(self) -> Plan:
@@ -172,30 +174,35 @@ class TwoOptResult:
 def two_opt_route(inst: Instance, sp: ShortestPaths, veh: Vehicle, stops: Sequence[int],
                   max_iter: int = DEFAULT_MAX_ITER) -> Tuple[List[int], RouteImprovement]:
     """Improve one route; returns (new stop order, statistics)."""
-    cur = list(stops)
+    cur = list(stops)            #current route
     why = _violation(inst, sp, veh, cur)
     if why is not None:
         raise ValueError(f"input route of vehicle {veh.id} is not feasible ({why})")
 
-    r = len(cur)
-    before_km = sp.route_distance([0] + cur + [0]) if cur else 0.0
-    imp = RouteImprovement(veh.id, list(cur), list(cur), before_km, before_km)
+    r = len(cur)      #number of stops on the route
+    before_km = sp.route_distance([0] + cur + [0]) if cur else 0.0     #og distance
+    imp = RouteImprovement(veh.id, list(cur), list(cur), before_km, before_km)    #object that'll store improved stats
     d = sp.dist
 
+    #seaeching for improved route by reversing segments of the current route. The outer loop continues until no more feasible improvements can be found or the maximum number of iterations is reached.
     while True:
         nodes = [0] + cur + [0]
         best = None                                   # (delta, a, b, candidate order)
+        #check for every possible reversal move of 2-opt
         for a in range(1, r):
             for b in range(a + 1, r + 1):
                 imp.delta_evaluations += 1
-                delta = (d(nodes[a - 1], nodes[b]) + d(nodes[a], nodes[b + 1])
+                delta = (d(nodes[a - 1], nodes[b]) + d(nodes[a], nodes[b + 1])     #delta = change in distance if segment s[a..b] is reversed
                          - d(nodes[a - 1], nodes[a]) - d(nodes[b], nodes[b + 1]))
-                if delta >= -EPS:                     # not an improvement
+                if delta >= -EPS:                     # not an improvement (for eg change of -0.0000000001 km is just rounding noise)
                     continue
-                if best is not None and delta >= best[0] - EPS:   # not better than current best
+                if best is not None and delta >= best[0] - EPS:   # not better than current best  (if delta -ve, newer route is shorter else reject)
                     continue
+                #create the proposed route (reversing a section of a list using list slicing)
                 cand = cur[:a - 1] + cur[a - 1:b][::-1] + cur[b:]
+                
                 imp.feasibility_checks += 1
+                #feasibility check of proposed route
                 why = _violation(inst, sp, veh, cand)
                 if why == "deadline":
                     imp.rejected_deadline += 1
@@ -203,15 +210,15 @@ def two_opt_route(inst: Instance, sp: ShortestPaths, veh: Vehicle, stops: Sequen
                 if why == "route_duration":
                     imp.rejected_duration += 1
                     continue
-                best = (delta, a, b, cand)
+                best = (delta, a, b, cand)       #save the best feasible move
         if best is None:
-            imp.converged = True
+            imp.converged = True      #The algorithm finds improvements, applies them, and eventually finds no more feasible improvements. (local optimum reached)
             break
         if len(imp.moves) >= max_iter:
-            imp.converged = False
+            imp.converged = False     #The algorithm has already applied 1000 improvements, but another feasible improvement still exists. It stops because it has reached its limit (found the improved route but not the local optimum).
             break
         delta, a, b, cur = best
-        imp.moves.append((a, b, delta))
+        imp.moves.append((a, b, delta))     #keep appending eac moves inorder to keep track of no. of moves to compare with max iterations
 
     imp.after = list(cur)
     imp.after_km = sp.route_distance([0] + cur + [0]) if cur else 0.0
