@@ -32,7 +32,7 @@ from data_generator import Instance
 from problem import Plan, leq
 from algorithms.shortest_path import ShortestPaths
 
-
+#Stores the verification results for one vehicle.
 @dataclass
 class RouteCheck:
     vehicle_id: int
@@ -43,7 +43,7 @@ class RouteCheck:
     completions: List[float] = field(default_factory=list)
     return_time: float = 0.0
 
-
+#This stores the overall verification result.
 @dataclass
 class PlanCheck:
     ok: bool
@@ -53,7 +53,7 @@ class PlanCheck:
     waste_value: int        # W = sum urgency * waste of served points
     distance: float         # D = total km
 
-
+#creates a dictionary containing only accessible roads and their distances.
 def check_plan(inst: Instance, sp: ShortestPaths, plan: Plan) -> PlanCheck:
     violations: List[str] = []
     vehicles = {v.id: v for v in inst.vehicles}
@@ -64,6 +64,8 @@ def check_plan(inst: Instance, sp: ShortestPaths, plan: Plan) -> PlanCheck:
         key = frozenset((r.u, r.v))
         open_w[key] = min(open_w.get(key, float("inf")), r.distance)
 
+    #Verifies journey from node A to B.
+    #It does not just trust a distance value from the distance matrix. It reconstructs the path and adds the actual road weights again.
     def leg_distance(a: int, b: int, where: str) -> Optional[float]:
         path = sp.path(a, b)
         if path is None:

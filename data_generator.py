@@ -71,7 +71,7 @@ class Instance:
     speed_kmh: float = SPEED_KMH
     seed: Optional[int] = None
 
-    # ---- basic helpers ---------------------------------------------------
+    # basic helpers 
     @property
     def node_count(self) -> int:
         return len(self.points) + 1
@@ -97,7 +97,7 @@ class Instance:
             adj[r.v].append((r.u, r.distance))
         return adj
 
-    # ---- connectivity / demand summaries ---------------------------------
+    # connectivity / demand summaries 
     def reachable_nodes(self) -> set:
         adj = self.adjacency()
         seen, stack = {0}, [0]
@@ -124,7 +124,7 @@ class Instance:
         cap = max(v.capacity for v in self.vehicles)
         return [p for p in self.points if p.waste > cap]
 
-    # ---- persistence -----------------------------------------------------
+    # persistence
     def to_dict(self) -> dict:
         return asdict(self)
 
@@ -147,7 +147,7 @@ class Instance:
             seed=d.get("seed"),
         )
 
-    # ---- human-readable summary -----------------------------------------
+    # human-readable summary
     def summary(self) -> str:
         unreach = self.unreachable_points()
         over = self.oversized_points()
@@ -170,10 +170,10 @@ class Instance:
 # --------------------------------------------------------------------------
 # Random generator
 # --------------------------------------------------------------------------
-def _euclid(a: Tuple[float, float], b: Tuple[float, float]) -> float:
+def _euclid(a: Tuple[float, float], b: Tuple[float, float]) -> float:    #to calculate distance between locations when generating roads
     return math.hypot(a[0] - b[0], a[1] - b[1])
 
-
+#this function creates a complete random city instance.
 def generate_instance(
     n_points: int = 16,
     n_isolated: int = 1,
@@ -181,9 +181,9 @@ def generate_instance(
     vehicle_capacities: Sequence[int] = DEFAULT_CAPACITIES,
     vehicle_durations: Optional[Sequence[float]] = DEFAULT_DURATIONS,
     demand_ratio: float = 1.08,
-    seed: int = 42,
-    name: str = "main",
-    area_km: float = 20.0,
+    seed: int = 42,          #controls randomness so that the same instance can be reproduced
+    name: str = "main",      #name of this instance
+    area_km: float = 20.0,        #size of sq area on which points are placed
 ) -> Instance:
     """
     Generate a reproducible random instance.
@@ -204,16 +204,18 @@ def generate_instance(
     rng = random.Random(seed)
     n_conn = n_points - n_isolated            # connected points (excluding depot)
     coords: Dict[int, Tuple[float, float]] = {0: (area_km / 2, area_km / 2)}
+    #generating coordinates within area_km, where depot is placed in middle
     for i in range(1, n_points + 1):
         coords[i] = (round(rng.uniform(0, area_km), 2), round(rng.uniform(0, area_km), 2))
 
+    #generate realistic road distances: 
     def road_len(u: int, v: int) -> float:
         return round(_euclid(coords[u], coords[v]) * rng.uniform(1.0, 1.3), 2)
 
     roads: List[Road] = []
     used = set()
 
-    # 2. spanning tree over connected nodes 0..n_conn
+    # 2. spanning tree over connected nodes 0..n_conn (building ST first to make sure every connected point is reachable from depot cz ST connects every node in the network)
     in_tree = [0]
     order = list(range(1, n_conn + 1))
     rng.shuffle(order)
@@ -224,7 +226,7 @@ def generate_instance(
         used.add(frozenset((u, v)))
         in_tree.append(v)
 
-    # 3. extra roads (sampled from the shortest candidate pairs)
+    # 3. extra roads (sampled from the shortest candidate pairs; to make it look like a network instead of ST)
     n_extra = max(0, usable_roads - len(roads))
     candidates = [
         (a, b)
@@ -238,13 +240,13 @@ def generate_instance(
         roads.append(Road(a, b, road_len(a, b)))
         used.add(frozenset((a, b)))
 
-    # 4. isolated points: roads exist but are all closed
+    # 4. isolated points: roads exist but are all closed   (for P16)
     for i in range(n_conn + 1, n_points + 1):
         nearest = sorted(range(n_conn + 1), key=lambda t: _euclid(coords[i], coords[t]))[:3]
         for t in nearest:
             roads.append(Road(t, i, road_len(t, i), accessible=False))
 
-    # vehicles
+    #create vehicles
     if vehicle_durations is None:
         vehicle_durations = [360] * len(vehicle_capacities)
     vehicles = [
@@ -254,10 +256,10 @@ def generate_instance(
     total_cap = sum(v.capacity for v in vehicles)
     max_cap = max(v.capacity for v in vehicles)
 
-    # waste: scale reachable demand to demand_ratio x fleet capacity
+    #generate waste quantities: scale reachable demand to demand_ratio x fleet capacity
     raw = {i: rng.randint(150, 500) for i in range(1, n_points + 1)}
     reach_sum = sum(raw[i] for i in range(1, n_conn + 1))
-    scale = (demand_ratio * total_cap) / reach_sum if reach_sum else 1.0
+    scale = (demand_ratio * total_cap) / reach_sum if reach_sum else 1.0    #to implement a scenario where not all waste can be collected for eg capacity of full fleet = 2000, but total waste is 1.08x2000= 2160 kg
 
     points: List[Point] = []
     for i in range(1, n_points + 1):
@@ -273,9 +275,7 @@ def generate_instance(
     return Instance(name, coords[0], points, roads, vehicles, SPEED_KMH, seed)
 
 
-# --------------------------------------------------------------------------
-# Hand-built edge-case instances (small, deterministic, easy to reason about)
-# --------------------------------------------------------------------------
+# Hand-built edge-case instances 5 edge-case test instances)
 def _manual(
     name: str,
     points: List[Tuple[float, float, int, int, float, float]],
@@ -355,9 +355,7 @@ def all_edge_cases() -> Dict[str, Instance]:
     )}
 
 
-# --------------------------------------------------------------------------
-# CLI: generate everything into ./data and print summaries
-# --------------------------------------------------------------------------
+# CLI: generate everything and print summaries
 if __name__ == "__main__":
     out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
     main_inst = generate_instance()

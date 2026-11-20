@@ -1,0 +1,375 @@
+{
+  "name": "main",
+  "depot": [
+    10.0,
+    10.0
+  ],
+  "points": [
+    {
+      "id": 1,
+      "name": "P01",
+      "x": 12.79,
+      "y": 0.5,
+      "waste": 399,
+      "urgency": 1,
+      "service_time": 13.0,
+      "deadline": 368.0
+    },
+    {
+      "id": 2,
+      "name": "P02",
+      "x": 5.5,
+      "y": 4.46,
+      "waste": 264,
+      "urgency": 3,
+      "service_time": 8.0,
+      "deadline": 400.0
+    },
+    {
+      "id": 3,
+      "name": "P03",
+      "x": 14.73,
+      "y": 13.53,
+      "waste": 412,
+      "urgency": 5,
+      "service_time": 11.0,
+      "deadline": 279.0
+    },
+    {
+      "id": 4,
+      "name": "P04",
+      "x": 17.84,
+      "y": 1.74,
+      "waste": 147,
+      "urgency": 6,
+      "service_time": 10.0,
+      "deadline": 378.0
+    },
+    {
+      "id": 5,
+      "name": "P05",
+      "x": 8.44,
+      "y": 0.6,
+      "waste": 473,
+      "urgency": 9,
+      "service_time": 5.0,
+      "deadline": 136.0
+    },
+    {
+      "id": 6,
+      "name": "P06",
+      "x": 4.37,
+      "y": 10.11,
+      "waste": 198,
+      "urgency": 6,
+      "service_time": 20.0,
+      "deadline": 244.0
+    },
+    {
+      "id": 7,
+      "name": "P07",
+      "x": 0.53,
+      "y": 3.98,
+      "waste": 474,
+      "urgency": 2,
+      "service_time": 16.0,
+      "deadline": 318.0
+    },
+    {
+      "id": 8,
+      "name": "P08",
+      "x": 13.0,
+      "y": 10.9,
+      "waste": 403,
+      "urgency": 4,
+      "service_time": 6.0,
+      "deadline": 301.0
+    },
+    {
+      "id": 9,
+      "name": "P09",
+      "x": 4.41,
+      "y": 11.79,
+      "waste": 272,
+      "urgency": 10,
+      "service_time": 7.0,
+      "deadline": 70.0
+    },
+    {
+      "id": 10,
+      "name": "P10",
+      "x": 16.19,
+      "y": 0.13,
+      "waste": 454,
+      "urgency": 8,
+      "service_time": 7.0,
+      "deadline": 128.0
+    },
+    {
+      "id": 11,
+      "name": "P11",
+      "x": 16.12,
+      "y": 13.96,
+      "waste": 308,
+      "urgency": 3,
+      "service_time": 9.0,
+      "deadline": 408.0
+    },
+    {
+      "id": 12,
+      "name": "P12",
+      "x": 6.81,
+      "y": 3.11,
+      "waste": 197,
+      "urgency": 8,
+      "service_time": 10.0,
+      "deadline": 93.0
+    },
+    {
+      "id": 13,
+      "name": "P13",
+      "x": 19.14,
+      "y": 6.73,
+      "waste": 285,
+      "urgency": 9,
+      "service_time": 18.0,
+      "deadline": 87.0
+    },
+    {
+      "id": 14,
+      "name": "P14",
+      "x": 1.85,
+      "y": 1.93,
+      "waste": 354,
+      "urgency": 9,
+      "service_time": 11.0,
+      "deadline": 99.0
+    },
+    {
+      "id": 15,
+      "name": "P15",
+      "x": 16.95,
+      "y": 12.07,
+      "waste": 219,
+      "urgency": 7,
+      "service_time": 16.0,
+      "deadline": 352.0
+    },
+    {
+      "id": 16,
+      "name": "P16",
+      "x": 16.14,
+      "y": 14.59,
+      "waste": 382,
+      "urgency": 9,
+      "service_time": 19.0,
+      "deadline": 75.0
+    }
+  ],
+  "roads": [
+    {
+      "u": 0,
+      "v": 3,
+      "distance": 7.44,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 10,
+      "distance": 14.6,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 8,
+      "distance": 3.3,
+      "accessible": true
+    },
+    {
+      "u": 10,
+      "v": 12,
+      "distance": 10.46,
+      "accessible": true
+    },
+    {
+      "u": 8,
+      "v": 13,
+      "distance": 8.98,
+      "accessible": true
+    },
+    {
+      "u": 10,
+      "v": 1,
+      "distance": 4.05,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 11,
+      "distance": 1.69,
+      "accessible": true
+    },
+    {
+      "u": 10,
+      "v": 4,
+      "distance": 2.42,
+      "accessible": true
+    },
+    {
+      "u": 12,
+      "v": 6,
+      "distance": 8.01,
+      "accessible": true
+    },
+    {
+      "u": 12,
+      "v": 5,
+      "distance": 3.61,
+      "accessible": true
+    },
+    {
+      "u": 11,
+      "v": 15,
+      "distance": 2.21,
+      "accessible": true
+    },
+    {
+      "u": 12,
+      "v": 14,
+      "distance": 6.33,
+      "accessible": true
+    },
+    {
+      "u": 12,
+      "v": 7,
+      "distance": 6.85,
+      "accessible": true
+    },
+    {
+      "u": 12,
+      "v": 2,
+      "distance": 2.4,
+      "accessible": true
+    },
+    {
+      "u": 0,
+      "v": 9,
+      "distance": 6.24,
+      "accessible": true
+    },
+    {
+      "u": 6,
+      "v": 8,
+      "distance": 10.19,
+      "accessible": true
+    },
+    {
+      "u": 11,
+      "v": 13,
+      "distance": 9.95,
+      "accessible": true
+    },
+    {
+      "u": 5,
+      "v": 7,
+      "distance": 9.63,
+      "accessible": true
+    },
+    {
+      "u": 2,
+      "v": 7,
+      "distance": 5.32,
+      "accessible": true
+    },
+    {
+      "u": 5,
+      "v": 14,
+      "distance": 8.73,
+      "accessible": true
+    },
+    {
+      "u": 8,
+      "v": 15,
+      "distance": 4.75,
+      "accessible": true
+    },
+    {
+      "u": 2,
+      "v": 14,
+      "distance": 4.56,
+      "accessible": true
+    },
+    {
+      "u": 0,
+      "v": 12,
+      "distance": 7.7,
+      "accessible": true
+    },
+    {
+      "u": 0,
+      "v": 2,
+      "distance": 7.37,
+      "accessible": true
+    },
+    {
+      "u": 1,
+      "v": 2,
+      "distance": 9.86,
+      "accessible": true
+    },
+    {
+      "u": 2,
+      "v": 5,
+      "distance": 6.01,
+      "accessible": true
+    },
+    {
+      "u": 6,
+      "v": 14,
+      "distance": 9.64,
+      "accessible": true
+    },
+    {
+      "u": 11,
+      "v": 16,
+      "distance": 0.64,
+      "accessible": false
+    },
+    {
+      "u": 3,
+      "v": 16,
+      "distance": 1.97,
+      "accessible": false
+    },
+    {
+      "u": 15,
+      "v": 16,
+      "distance": 3.44,
+      "accessible": false
+    }
+  ],
+  "vehicles": [
+    {
+      "id": 1,
+      "capacity": 800,
+      "max_duration": 300.0
+    },
+    {
+      "id": 2,
+      "capacity": 1000,
+      "max_duration": 330.0
+    },
+    {
+      "id": 3,
+      "capacity": 1200,
+      "max_duration": 360.0
+    },
+    {
+      "id": 4,
+      "capacity": 1500,
+      "max_duration": 390.0
+    }
+  ],
+  "speed_kmh": 30.0,
+  "seed": 42
+}

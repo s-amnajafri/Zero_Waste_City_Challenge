@@ -1,0 +1,167 @@
+{
+  "name": "small_seed1",
+  "depot": [
+    5.0,
+    5.0
+  ],
+  "points": [
+    {
+      "id": 1,
+      "name": "P01",
+      "x": 1.34,
+      "y": 8.47,
+      "waste": 173,
+      "urgency": 4,
+      "service_time": 14.0,
+      "deadline": 312.0
+    },
+    {
+      "id": 2,
+      "name": "P02",
+      "x": 7.64,
+      "y": 2.55,
+      "waste": 121,
+      "urgency": 10,
+      "service_time": 20.0,
+      "deadline": 124.0
+    },
+    {
+      "id": 3,
+      "name": "P03",
+      "x": 4.95,
+      "y": 4.49,
+      "waste": 184,
+      "urgency": 7,
+      "service_time": 6.0,
+      "deadline": 362.0
+    },
+    {
+      "id": 4,
+      "name": "P04",
+      "x": 6.52,
+      "y": 7.89,
+      "waste": 233,
+      "urgency": 4,
+      "service_time": 17.0,
+      "deadline": 346.0
+    },
+    {
+      "id": 5,
+      "name": "P05",
+      "x": 0.94,
+      "y": 0.28,
+      "waste": 210,
+      "urgency": 3,
+      "service_time": 16.0,
+      "deadline": 380.0
+    },
+    {
+      "id": 6,
+      "name": "P06",
+      "x": 8.36,
+      "y": 4.33,
+      "waste": 235,
+      "urgency": 6,
+      "service_time": 7.0,
+      "deadline": 352.0
+    },
+    {
+      "id": 7,
+      "name": "P07",
+      "x": 7.62,
+      "y": 0.02,
+      "waste": 283,
+      "urgency": 9,
+      "service_time": 8.0,
+      "deadline": 80.0
+    }
+  ],
+  "roads": [
+    {
+      "u": 0,
+      "v": 6,
+      "distance": 3.45,
+      "accessible": true
+    },
+    {
+      "u": 6,
+      "v": 7,
+      "distance": 5.61,
+      "accessible": true
+    },
+    {
+      "u": 7,
+      "v": 5,
+      "distance": 8.06,
+      "accessible": true
+    },
+    {
+      "u": 6,
+      "v": 1,
+      "distance": 9.92,
+      "accessible": true
+    },
+    {
+      "u": 6,
+      "v": 2,
+      "distance": 2.36,
+      "accessible": true
+    },
+    {
+      "u": 2,
+      "v": 3,
+      "distance": 3.87,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 4,
+      "distance": 4.0,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 6,
+      "distance": 3.84,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 5,
+      "distance": 7.41,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 7,
+      "distance": 6.65,
+      "accessible": true
+    },
+    {
+      "u": 0,
+      "v": 2,
+      "distance": 3.71,
+      "accessible": true
+    },
+    {
+      "u": 0,
+      "v": 3,
+      "distance": 0.61,
+      "accessible": true
+    }
+  ],
+  "vehicles": [
+    {
+      "id": 1,
+      "capacity": 700,
+      "max_duration": 300.0
+    },
+    {
+      "id": 2,
+      "capacity": 900,
+      "max_duration": 300.0
+    }
+  ],
+  "speed_kmh": 30.0,
+  "seed": 1
+}

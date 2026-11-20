@@ -1,0 +1,84 @@
+{
+  "name": "edge_no_2opt_gain",
+  "depot": [
+    0.0,
+    0.0
+  ],
+  "points": [
+    {
+      "id": 1,
+      "name": "P01",
+      "x": 2,
+      "y": 0,
+      "waste": 100,
+      "urgency": 5,
+      "service_time": 5.0,
+      "deadline": 300.0
+    },
+    {
+      "id": 2,
+      "name": "P02",
+      "x": 4,
+      "y": 0,
+      "waste": 100,
+      "urgency": 5,
+      "service_time": 5.0,
+      "deadline": 300.0
+    },
+    {
+      "id": 3,
+      "name": "P03",
+      "x": 6,
+      "y": 0,
+      "waste": 100,
+      "urgency": 5,
+      "service_time": 5.0,
+      "deadline": 300.0
+    },
+    {
+      "id": 4,
+      "name": "P04",
+      "x": 8,
+      "y": 0,
+      "waste": 100,
+      "urgency": 5,
+      "service_time": 5.0,
+      "deadline": 300.0
+    }
+  ],
+  "roads": [
+    {
+      "u": 0,
+      "v": 1,
+      "distance": 2.0,
+      "accessible": true
+    },
+    {
+      "u": 1,
+      "v": 2,
+      "distance": 2.0,
+      "accessible": true
+    },
+    {
+      "u": 2,
+      "v": 3,
+      "distance": 2.0,
+      "accessible": true
+    },
+    {
+      "u": 3,
+      "v": 4,
+      "distance": 2.0,
+      "accessible": true
+    }
+  ],
+  "vehicles": [
+    {
+      "id": 1,
+      "capacity": 1000,
+      "max_duration": 300.0
+    }
+  ],
+  "speed_kmh": 30.0,
+  "seed": null
+}
